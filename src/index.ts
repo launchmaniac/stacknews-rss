@@ -44,8 +44,13 @@ app.use('/api/*', async (c, next) => {
     return c.json({ error: 'Server configuration error' }, 500);
   }
 
-  const auth = bearerAuth({ token: config.apiSecret });
-  return auth(c, next);
+  try {
+    const auth = bearerAuth({ token: config.apiSecret });
+    return await auth(c, next);
+  } catch (err) {
+    console.error('[Auth] Bearer auth error:', err);
+    return c.json({ error: 'Authentication error' }, 401);
+  }
 });
 
 app.route('/api/feeds', feedsRoute);
