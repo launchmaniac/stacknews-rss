@@ -134,8 +134,8 @@ export async function getTreasuryFiscalSnapshot(
   if (Array.isArray(cashJson?.data)) {
     const series = cashJson.data
       .map((d: any) => ({ date: d.record_date || d.transaction_dt, value: parseFloat(d.open_today_bal) }))
-      .filter((p: any) => p.date && !isNaN(p.value));
-    snapshot.cashHistory = series.slice().reverse().map(p => ({ date: p.date, value: p.value * 1_000_000 }));
+      .filter((p: { date: string; value: number }) => p.date && !isNaN(p.value));
+    snapshot.cashHistory = series.slice().reverse().map((p: { date: string; value: number }) => ({ date: p.date, value: p.value * 1_000_000 }));
     if (series[0]) snapshot.cash = series[0].value * 1_000_000;
   }
 
