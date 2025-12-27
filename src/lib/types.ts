@@ -62,3 +62,38 @@ export interface HealthResponse {
     stale: number;
   };
 }
+
+// Treasury Fiscal Data Types
+export interface DebtGrowthRate {
+  dailyAverage: number;
+  perSecond: number;
+  periodStart: string;
+  periodEnd: string;
+  totalGrowth: number;
+  daysInPeriod: number;
+}
+
+export interface TreasuryFiscalSnapshot {
+  debt: number;
+  debtTimestamp?: string;
+  debtHistory: { date: string; value: number }[];
+  debtGrowthRate?: DebtGrowthRate;
+  avgInterestRate: number;
+  rateHistory: { date: string; value: number }[];
+  cash: number;
+  cashHistory: { date: string; value: number }[];
+}
+
+// Yield Curve Types
+export interface YieldCurvePoint {
+  date: string;
+  bc_1month?: number;
+  bc_3month?: number;
+  bc_6month?: number;
+  bc_1year?: number;
+  bc_2year?: number;
+  bc_5year?: number;
+  bc_10year?: number;
+  bc_30year?: number;
+  spread_10y2y?: number;
+}

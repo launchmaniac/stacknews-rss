@@ -12,6 +12,7 @@ import { initScheduler, stopScheduler, startInitialWarm } from './scheduler/cron
 
 import feedsRoute from './routes/feeds.js';
 import healthRoute from './routes/health.js';
+import treasuryRoute from './routes/treasury.js';
 
 const app = new Hono();
 
@@ -48,16 +49,19 @@ app.use('/api/*', async (c, next) => {
 });
 
 app.route('/api/feeds', feedsRoute);
+app.route('/api/treasury', treasuryRoute);
 
 // Root route
 app.get('/', (c) => {
   return c.json({
     service: 'stacknews-rss',
-    version: '1.0.0',
+    version: '1.1.0',
     endpoints: {
       feeds: '/api/feeds?category=TREASURY',
       categories: '/api/feeds/categories',
       stream: '/api/feeds/stream',
+      treasuryFiscal: '/api/treasury/fiscal',
+      yieldCurve: '/api/treasury/yield-curve?days=60',
       health: '/health',
       ready: '/health/ready',
       metrics: '/health/metrics',

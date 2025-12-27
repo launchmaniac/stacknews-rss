@@ -6,6 +6,7 @@ export const config = {
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379/0',
   apiSecret: process.env.API_SECRET || '',
   corsOrigin: process.env.CORS_ORIGIN || 'https://stacknews.org',
+  fredApiKey: process.env.FRED_API_KEY || '',
 } as const;
 
 export const REDIS_PREFIX = 'stacknews:';
@@ -26,6 +27,10 @@ export const CACHE_TTL = {
 
   // Refresh locks
   REFRESH_LOCK: 60,             // 1 minute
+
+  // Treasury API caching
+  TREASURY_FISCAL: 30 * 60,     // 30 minutes
+  YIELD_CURVE: 60 * 60,         // 1 hour
 
   // Per-category overrides (in seconds)
   CATEGORY_OVERRIDES: {
