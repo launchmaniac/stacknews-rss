@@ -198,11 +198,11 @@ async function fetchFredSeries(
       signal: AbortSignal.timeout(FETCH_CONFIG.TIMEOUT_MS)
     });
     if (res.ok) {
-      const json = await res.json();
-      const observations: any[] = json?.observations || [];
+      const json = await res.json() as { observations?: Array<{ date: string; value: string }> };
+      const observations = json?.observations || [];
       return observations
-        .filter((o: any) => o.value !== '.' && !isNaN(parseFloat(o.value)))
-        .map((o: any) => ({
+        .filter((o) => o.value !== '.' && !isNaN(parseFloat(o.value)))
+        .map((o) => ({
           date: o.date,
           value: parseFloat(o.value)
         }));
