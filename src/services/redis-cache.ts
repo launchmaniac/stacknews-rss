@@ -192,16 +192,21 @@ export async function releaseRefreshLock(category: string): Promise<void> {
 }
 
 // Cache stats for health endpoint
-export async function getCacheStats(): Promise<{ cached: number; total: number }> {
+export async function getCacheStats(): Promise<{ cached: number; total: number; stale: number }> {
   try {
-    const pattern = `${REDIS_PREFIX}category:*:aggregate`;
-    const cachedKeys = await getRedis().keys(pattern);
+    const aggregatePattern = `${REDIS_PREFIX}category:*:aggregate`;
+    const stalePattern = `${REDIS_PREFIX}category:*:stale`;
+    const [cachedKeys, staleKeys] = await Promise.all([
+      getRedis().keys(aggregatePattern),
+      getRedis().keys(stalePattern),
+    ]);
     return {
       cached: cachedKeys.length,
       total: 23, // Known category count
+      stale: staleKeys.length,
     };
   } catch {
-    return { cached: 0, total: 23 };
+    return { cached: 0, total: 23, stale: 0 };
   }
 }
 
