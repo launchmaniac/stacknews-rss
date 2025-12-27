@@ -1,0 +1,26 @@
+# Product of Launch Maniac llc, Las Vegas, Nevada - (725) 444-8200  support@launchmaniac.com
+
+services:
+  stacknews-rss:
+    build: .
+    container_name: stacknews-rss
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3100:3100"
+    environment:
+      - NODE_ENV=production
+      - PORT=3100
+      - REDIS_URL=redis://shared-redis:6379/0
+      - API_SECRET=${STACKNEWS_API_SECRET}
+      - CORS_ORIGIN=https://stacknews.org
+    networks:
+      - shared-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  shared-net:
+    external: true
