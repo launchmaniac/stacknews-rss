@@ -11,8 +11,9 @@ services:
       - NODE_ENV=production
       - PORT=3200
       - REDIS_URL=redis://shared-redis:6379/0
-      - API_SECRET=${STACKNEWS_API_SECRET}
+      - API_SECRET=${API_SECRET}
       - CORS_ORIGIN=https://stacknews.org
+      - FRED_API_KEY=${FRED_API_KEY}
     networks:
       - shared-net
     healthcheck:
