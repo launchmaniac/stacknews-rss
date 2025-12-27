@@ -6,17 +6,17 @@ services:
     container_name: stacknews-rss
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3100:3100"
+      - "127.0.0.1:3200:3200"
     environment:
       - NODE_ENV=production
-      - PORT=3100
+      - PORT=3200
       - REDIS_URL=redis://shared-redis:6379/0
       - API_SECRET=${STACKNEWS_API_SECRET}
       - CORS_ORIGIN=https://stacknews.org
     networks:
       - shared-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3100/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3200/health"]
       interval: 30s
       timeout: 10s
       retries: 3
