@@ -57,19 +57,21 @@ function parseRSS(xml: string, feedConfig: FeedConfig): RSSItem[] {
     while ((match = itemRegex.exec(xml)) !== null) {
       const item = match[1];
       const title = extractTag(item, 'title') || '';
-      const link = extractTag(item, 'link') || '';
+      const rawLink = extractTag(item, 'link') || '';
+      const guid = extractTag(item, 'guid') || '';
+      // Use link if available, otherwise fall back to guid (some feeds only have guid)
+      const link = rawLink || guid;
       const pubDate = extractTag(item, 'pubDate') || extractTag(item, 'dc:date') || '';
       const description = extractTag(item, 'description') || '';
       const content = extractTag(item, 'content:encoded') || description;
       const author = extractTag(item, 'author') || extractTag(item, 'dc:creator') || '';
-      const guid = extractTag(item, 'guid') || link;
 
       if (title && link) {
         items.push({
           title: decodeEntities(title),
           link,
           pubDate,
-          guid,
+          guid: guid || link,
           author: decodeEntities(author),
           description: truncate(stripHtml(decodeEntities(description)), 500),
           content: decodeEntities(content),
@@ -88,7 +90,8 @@ function parseRSS(xml: string, feedConfig: FeedConfig): RSSItem[] {
 
 // Helper functions
 function extractTag(xml: string, tag: string): string | null {
-  const regex = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>|<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
+  // Match CDATA content (with optional whitespace) or plain content
+  const regex = new RegExp(`<${tag}[^>]*>\\s*<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>\\s*<\\/${tag}>|<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i');
   const match = xml.match(regex);
   return match ? (match[1] || match[2] || '').trim() : null;
 }
