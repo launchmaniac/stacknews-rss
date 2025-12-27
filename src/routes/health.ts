@@ -2,7 +2,7 @@
 
 import { Hono } from 'hono';
 import { isRedisConnected, getCacheStats } from '../services/redis-cache.js';
-import { getCachedCategoriesCount, getLastRefreshedCategory, getStaleCategories } from '../services/coordinator.js';
+import { getCachedCategoriesCount, getLastRefreshedCategory, getStaleCategories, warmAllCategories } from '../services/coordinator.js';
 import type { HealthResponse } from '../lib/types.js';
 
 const health = new Hono();
@@ -49,6 +49,24 @@ health.get('/ready', async (c) => {
     },
     503
   );
+});
+
+// POST /warm - Trigger full cache warm (requires API key in query param)
+health.post('/warm', async (c) => {
+  const apiKey = c.req.query('key');
+  const expectedKey = process.env.API_SECRET;
+
+  if (!expectedKey || apiKey !== expectedKey) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  // Run warm in background, don't block response
+  warmAllCategories().catch(console.error);
+
+  return c.json({
+    message: 'Cache warm started',
+    note: 'Check /health for progress'
+  });
 });
 
 // GET /metrics - Basic metrics (Prometheus-compatible)
