@@ -161,14 +161,18 @@ function truncate(str: string, maxLen: number): string {
 // Fetch a single feed with retry logic
 async function fetchFeed(feedConfig: FeedConfig): Promise<RSSItem[]> {
   const meta = await getFeedMeta(feedConfig.id);
+  const cachedData = await getFeedData(feedConfig.id);
   const headers: Record<string, string> = {
     'User-Agent': FETCH_CONFIG.USER_AGENT,
     'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml, */*',
   };
 
-  // Add conditional headers if we have cached metadata
-  if (meta?.etag) headers['If-None-Match'] = meta.etag;
-  if (meta?.lastModified) headers['If-Modified-Since'] = meta.lastModified;
+  // Only add conditional headers if we have BOTH metadata AND cached data
+  // This prevents 304 responses when cached data has expired
+  if (cachedData && cachedData.length > 0) {
+    if (meta?.etag) headers['If-None-Match'] = meta.etag;
+    if (meta?.lastModified) headers['If-Modified-Since'] = meta.lastModified;
+  }
 
   let lastError: Error | null = null;
 
@@ -184,10 +188,12 @@ async function fetchFeed(feedConfig: FeedConfig): Promise<RSSItem[]> {
 
       clearTimeout(timeout);
 
-      // 304 Not Modified - use cached data
+      // 304 Not Modified - use cached data (should always exist since we only send
+      // conditional headers when cached data exists)
       if (response.status === 304) {
-        const cached = await getFeedData(feedConfig.id);
-        if (cached) return cached;
+        if (cachedData && cachedData.length > 0) return cachedData;
+        // This shouldn't happen, but handle gracefully
+        throw new Error('HTTP 304 but no cached data');
       }
 
       if (!response.ok) {
